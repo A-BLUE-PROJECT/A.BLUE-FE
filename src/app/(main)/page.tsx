@@ -2,7 +2,7 @@ import HeroSection from "@/components/landing/HeroSection";
 
 export default function Home() {
   return (
-    <main className="w-full bg-zinc-950 font-sans">
+    <main className="w-full font-sans">
       <HeroSection />
     </main>
   );

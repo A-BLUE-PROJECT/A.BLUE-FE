@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useUIStore } from "@/store/useUIStore";
 
-// Mock data
+// Mock data (Deterministic to prevent Hydration mismatch)
 const generateMockLookbooks = (page: number) => {
   return Array.from({ length: 12 }).map((_, i) => {
     const id = page * 100 + i;
@@ -15,17 +16,20 @@ const generateMockLookbooks = (page: number) => {
       "/images/look_bottom_4.png",
       "/images/look_bottom_5.png",
     ];
+    const allTags = ["Minimal", "Street", "Avant-Garde", "Casual", "Editorial"];
+    
     return {
       id,
       src: images[id % images.length],
-      score: Math.floor(Math.random() * 20) + 80, // 80 to 99
-      tags: ["Minimal", "Street", "Avant-Garde", "Casual"].sort(() => 0.5 - Math.random()).slice(0, 2),
+      score: 80 + (id % 20), // Deterministic score based on id
+      tags: [allTags[id % allTags.length], allTags[(Math.floor(id * 1.5) + 1) % allTags.length]],
     };
   });
 };
 
 export default function LookbookGrid() {
   const lookbooks = generateMockLookbooks(1);
+  const { openQuickView } = useUIStore();
 
   // Cycle through different aspect ratios to create a Pinterest masonry waterfall effect natively
   const getAspectClass = (index: number) => {
@@ -59,7 +63,8 @@ export default function LookbookGrid() {
               <motion.div 
                 whileHover={{ scale: 0.98, y: -5 }} 
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                className="relative w-full h-full bg-zinc-900 rounded-2xl overflow-hidden border border-white/5 shadow-md"
+                onClick={() => openQuickView(lookbooks, idx)}
+                className="relative w-full h-full bg-zinc-900 rounded-2xl overflow-hidden border border-white/5 shadow-md cursor-pointer"
               >
                 <Image
                   src={lb.src}

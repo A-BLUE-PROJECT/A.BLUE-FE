@@ -18,7 +18,6 @@
 
 ## Phase 3: Personalization & Auth (4주)
 - [ ] **소셜 로그인**: NextAuth.js 기반의 소셜 로그인 및 회원가입 연동 (JWT 인증 체계)
-- [ ] [cite_start]**유저 핏 프로필(FitProfile)**: 키, 몸무게, 어깨너비 등 유저 체형 데이터 입력 및 관리 페이지 구현 [cite: 58, 72]
 - [ ] [cite_start]**룩북 상세 및 핏 스코어**: 등록된 `FitProfile`과 상품 실측 데이터를 비교하여 개인별 **Fit Score(매칭률)** 시각화 배지 개발 [cite: 13, 79]
 
 ## Phase 4: Visual Polish & Performance (5주+)

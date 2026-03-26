@@ -69,10 +69,10 @@ export default function HeroSection() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950 text-white"
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white"
           >
             <div className="flex flex-col items-center gap-6">
-              <div className="w-16 h-16 border-t-2 border-white rounded-full animate-spin" />
+              <div className="w-16 h-16 border-t-2 border-zinc-950 dark:border-white rounded-full animate-spin" />
               <div className="text-sm font-bold tracking-widest uppercase animate-pulse">
                 Orchestrating Style...
               </div>

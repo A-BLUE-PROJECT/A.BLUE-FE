@@ -4,10 +4,10 @@ import Image from "next/image";
 
 export default function MagazineGrid() {
   return (
-    <div className="relative w-full min-h-screen bg-white">
+    <div className="relative w-full min-h-screen bg-white" style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }}>
       {/* 
         TYPOGRAPHY OVERLAY 
-        Changed from fixed to absolute so it scrolls naturally with the container
+        Changed from fixed back to absolute so it scrolls naturally with the container
       */}
       <div className="pointer-events-none absolute inset-0 z-50 flex flex-col items-center justify-center text-white mix-blend-difference overflow-hidden">
         {/* Main Title */}
@@ -16,15 +16,16 @@ export default function MagazineGrid() {
           <span>BLUE</span>
         </h1>
 
-        {/* Bottom Text */}
-        <div className="mt-4 md:mt-8 text-3xl md:text-6xl font-bold tracking-tight lowercase">
-          lookbook
+        {/* Slogan Text: Ultra-Tight Constraint for Narrow Gap */}
+        <div className="mt-20 md:mt-32 flex flex-col w-[20vw] min-w-[120px] max-w-[300px]">
+          <div className="text-sm sm:text-base md:text-[22px] font-black tracking-tighter leading-none uppercase text-left opacity-90">Mix Malls</div>
+          <div className="text-sm sm:text-base md:text-[22px] font-black tracking-tighter leading-none uppercase text-right mt-1 opacity-90">Match Your Style</div>
         </div>
       </div>
 
       {/* IMAGE GRID */}
       <main className="relative z-10 w-full max-w-[1600px] mx-auto min-h-screen flex flex-col justify-between pt-10 md:pt-20 px-4 md:px-8 pb-8 gap-4">
-        
+
         {/* Top 2 Large Images */}
         <div className="grid grid-cols-2 gap-4 md:gap-12 w-full max-w-5xl mx-auto flex-1">
           {/* Left Model */}

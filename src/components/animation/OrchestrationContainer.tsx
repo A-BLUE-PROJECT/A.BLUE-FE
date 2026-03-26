@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import Image from "next/image";
 import { Lookbook } from "@/types/lookbook";
 
@@ -22,7 +22,7 @@ export default function OrchestrationContainer({ lookbook }: { lookbook: Lookboo
   const resultScale = useTransform(scrollYProgress, [0.8, 1.0], [0.9, 1]);
 
   return (
-    <div ref={containerRef} className="relative w-full h-[300vh] bg-zinc-950 text-white">
+    <div ref={containerRef} className="relative w-full h-[300vh] bg-white dark:bg-zinc-950 text-black dark:text-white">
       <div className="sticky top-0 w-full h-screen overflow-hidden flex flex-col items-center justify-center perspective-1000">
         
         {/* Background Atmosphere */}
@@ -43,7 +43,7 @@ export default function OrchestrationContainer({ lookbook }: { lookbook: Lookboo
             className="object-cover"
             priority
           />
-          <div className="absolute bottom-6 left-6 right-6">
+          <div className="absolute bottom-6 left-6 right-6 text-white">
             <h2 className="text-3xl font-black uppercase tracking-tight">{lookbook.title}</h2>
             <p className="text-zinc-400 text-sm tracking-wide">Mix Malls, Match Your Style</p>
           </div>
@@ -51,38 +51,9 @@ export default function OrchestrationContainer({ lookbook }: { lookbook: Lookboo
 
         {/* Scattered "Ingredients" / Products */}
         <div className="absolute inset-0 z-10 pointer-events-none">
-          {lookbook.items.map((item, index) => {
-            // Map the individual pull progress to transform the initial position to center (0,0)
-            const x = useTransform(pullProgress, [0, 1], [`${item.initialPosition.x}vw`, "0vw"]);
-            const y = useTransform(pullProgress, [0, 1], [`${item.initialPosition.y}vh`, "0vh"]);
-            const rotate = useTransform(pullProgress, [0, 1], [item.initialPosition.rotate, 0]);
-            const scale = useTransform(pullProgress, [0, 1], [1, 0.2]); // shrink as they converge
-            const opacity = useTransform(pullProgress, [0, 0.9, 1], [1, 0.5, 0]); // fade out when converged
-
-            return (
-              <motion.div
-                key={item.id}
-                style={{
-                  x,
-                  y,
-                  rotate,
-                  scale,
-                  opacity,
-                }}
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 aspect-[3/4] bg-zinc-900 rounded-xl overflow-hidden shadow-xl border border-white/5"
-              >
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  className="object-cover opacity-80"
-                />
-                <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2 py-1 rounded text-[10px] font-medium tracking-wider uppercase border border-white/10">
-                  {item.brand}
-                </div>
-              </motion.div>
-            );
-          })}
+          {lookbook.items.map((item) => (
+            <ScatterItem key={item.id} item={item} pullProgress={pullProgress} />
+          ))}
         </div>
 
         {/* Instructional Scroll Down Text */}
@@ -96,5 +67,25 @@ export default function OrchestrationContainer({ lookbook }: { lookbook: Lookboo
 
       </div>
     </div>
+  );
+}
+
+function ScatterItem({ item, pullProgress }: { item: any; pullProgress: MotionValue<number> }) {
+  const x = useTransform(pullProgress, [0, 1], [`${item.initialPosition.x}vw`, "0vw"]);
+  const y = useTransform(pullProgress, [0, 1], [`${item.initialPosition.y}vh`, "0vh"]);
+  const rotate = useTransform(pullProgress, [0, 1], [item.initialPosition.rotate, 0]);
+  const scale = useTransform(pullProgress, [0, 1], [1, 0.2]);
+  const opacity = useTransform(pullProgress, [0, 0.9, 1], [1, 0.5, 0]);
+
+  return (
+    <motion.div
+      style={{ x, y, rotate, scale, opacity }}
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 aspect-[3/4] bg-zinc-100 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-xl border border-black/5 dark:border-white/5"
+    >
+      <Image src={item.image} alt={item.name} fill className="object-cover opacity-80" />
+      <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md px-2 py-1 rounded text-[10px] font-medium tracking-wider uppercase border border-white/10 text-white">
+        {item.brand}
+      </div>
+    </motion.div>
   );
 }
