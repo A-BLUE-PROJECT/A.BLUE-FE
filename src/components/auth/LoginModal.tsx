@@ -62,7 +62,7 @@ export default function LoginModal() {
             </div>
             
             <div className="text-center mt-6 text-[10px] text-zinc-500 font-medium tracking-wide">
-              * Logging in gives access to Admin routes.
+              * Logging in gives access to MVP Admin panel.
             </div>
           </motion.div>
         </>
