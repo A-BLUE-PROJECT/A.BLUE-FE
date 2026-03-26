@@ -6,7 +6,7 @@ import { useUIStore } from "@/store/useUIStore";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const { openLoginModal, toggleMenu, isMenuOpen } = useUIStore();
+  const { openLoginModal } = useUIStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,15 +18,16 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 text-white ${
-        scrolled && !isMenuOpen ? "bg-black/20 dark:bg-black/40 backdrop-blur-md py-4 border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.1)]" : "bg-transparent py-6"
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 w-full text-black dark:text-white ${
+        scrolled 
+          ? "bg-white/80 dark:bg-black/80 backdrop-blur-md py-4 border-b border-black/5 dark:border-white/5 shadow-sm" 
+          : "bg-transparent py-6"
       }`}
     >
-      <div className="max-w-[1600px] mx-auto px-6 flex items-center justify-between mix-blend-difference">
+      <div className="max-w-[1600px] mx-auto px-6 flex items-center justify-between">
         {/* Left: Brand Identity */}
         <Link
           href="/"
-          onClick={() => isMenuOpen && toggleMenu()}
           className="font-black text-xl md:text-2xl tracking-tighter uppercase cursor-pointer hover:opacity-70 transition-opacity"
         >
           ALL BLUE
@@ -37,9 +38,21 @@ export default function Header() {
           <button onClick={openLoginModal} className="hover:underline underline-offset-8 decoration-2 transition-all">
             LOG IN
           </button>
-          <button onClick={toggleMenu} className="hover:underline underline-offset-8 decoration-2 transition-all">
-            {isMenuOpen ? "CLOSE" : "MENU"}
-          </button>
+          
+          {/* Dropdown Menu Container */}
+          <div className="relative group py-4 -my-4">
+            <button className="hover:underline underline-offset-8 decoration-2 transition-all">
+              MENU
+            </button>
+            
+            {/* Hover Dropdown */}
+            <div className="absolute right-0 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
+              <div className="flex flex-col gap-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md py-4 px-5 rounded-xl shadow-2xl border border-black/5 dark:border-white/10 whitespace-nowrap text-right">
+                <Link href="/" className="text-sm font-black tracking-widest hover:text-blue-600 dark:hover:text-blue-400 transition-colors">HOME</Link>
+                <Link href="/gallery" className="text-sm font-black tracking-widest hover:text-blue-600 dark:hover:text-blue-400 transition-colors">GALLERY</Link>
+              </div>
+            </div>
+          </div>
         </nav>
       </div>
     </header>

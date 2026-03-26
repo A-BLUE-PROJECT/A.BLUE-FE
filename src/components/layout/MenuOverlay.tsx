@@ -35,13 +35,6 @@ export default function MenuOverlay() {
             >
               Gallery
             </Link>
-            <Link 
-              href="/admin/inspect" 
-              onClick={closeMenu}
-              className="text-5xl md:text-8xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-zinc-600 hover:text-white hover:scale-105 transition-all duration-300"
-            >
-              Admin
-            </Link>
           </nav>
         </motion.div>
       )}
