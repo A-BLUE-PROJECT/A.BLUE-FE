@@ -49,7 +49,6 @@ export default function Header() {
             <div className="absolute right-0 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
               <div className="flex flex-col gap-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md py-4 px-5 rounded-xl shadow-2xl border border-black/5 dark:border-white/10 whitespace-nowrap text-right">
                 <Link href="/" className="text-sm font-black tracking-widest hover:text-blue-600 dark:hover:text-blue-400 transition-colors">HOME</Link>
-                <Link href="/gallery" className="text-sm font-black tracking-widest hover:text-blue-600 dark:hover:text-blue-400 transition-colors">GALLERY</Link>
               </div>
             </div>
           </div>
