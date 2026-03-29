@@ -9,7 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-*.md
+# *.md (Removed to allow documentation tracking)
 # testing
 /coverage
 
