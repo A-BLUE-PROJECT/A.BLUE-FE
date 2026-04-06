@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUIStore } from "@/store/useUIStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { openLoginModal } = useUIStore();
+  const { user, fetchMe, logout } = useAuthStore();
+
+  useEffect(() => {
+    fetchMe();
+  }, [fetchMe]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,9 +41,15 @@ export default function Header() {
         
         {/* Right: Minimal Nav */}
         <nav className="flex items-center gap-6 md:gap-8 text-[11px] md:text-sm font-bold tracking-widest uppercase">
-          <button onClick={openLoginModal} className="hover:underline underline-offset-8 decoration-2 transition-all">
-            LOG IN
-          </button>
+          {user ? (
+            <button onClick={logout} className="hover:underline underline-offset-8 decoration-2 transition-all">
+              LOG OUT
+            </button>
+          ) : (
+            <button onClick={openLoginModal} className="hover:underline underline-offset-8 decoration-2 transition-all">
+              LOG IN
+            </button>
+          )}
           
           {/* Dropdown Menu Container */}
           <div className="relative group py-4 -my-4">

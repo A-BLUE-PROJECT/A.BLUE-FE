@@ -18,12 +18,17 @@ export interface ModelImage {
   imageUrl: string;
 }
 
-export const MOCK_CAFE24_PRODUCTS: GeneratorProduct[] = [
-  { productId: 1, name: 'A.BLUE Signature Denim', price: 89000, thumbnailUrl: 'https://picsum.photos/seed/p1/200/200', position: 'BOTTOM' },
-  { productId: 2, name: 'Oversized Wool Blazer', price: 154000, thumbnailUrl: 'https://picsum.photos/seed/p2/200/200', position: 'OUTER' },
-  { productId: 3, name: 'Basic Logo T-Shirt', price: 39000, thumbnailUrl: 'https://picsum.photos/seed/p3/200/200', position: 'TOP' },
-  { productId: 4, name: 'Leather Crossbody Bag', price: 112000, thumbnailUrl: 'https://picsum.photos/seed/p4/200/200', position: 'BAG' },
-];
+interface AdminProduct {
+  id: number;
+  brandName: string;
+  productName: string;
+  price: number;
+  salePrice: number;
+  productImageUrl: string;
+  mappedCategory: string;
+  stockStatus: string;
+  hidden: boolean;
+}
 
 interface GeneratorState {
   // 기본 설정
@@ -35,6 +40,8 @@ interface GeneratorState {
   referenceImageUrl: string | null;
 
   // 상품
+  products: GeneratorProduct[];
+  isLoadingProducts: boolean;
   selectedProducts: GeneratorProduct[];
 
   // 모델
@@ -54,6 +61,7 @@ interface GeneratorState {
   setTargetGender: (v: TargetGender) => void;
   setRatio: (v: '1:1' | '3:4' | '9:16') => void;
   setReferenceImageUrl: (v: string | null) => void;
+  loadProducts: () => Promise<void>;
   toggleProduct: (p: GeneratorProduct) => void;
   setSelectedModelUrl: (url: string | null) => void;
   loadModels: (gender: TargetGender) => Promise<void>;
@@ -68,6 +76,8 @@ export const useGeneratorStore = create<GeneratorState>((set, get) => ({
   targetGender: 'WOMEN',
   ratio: '3:4',
   referenceImageUrl: null,
+  products: [],
+  isLoadingProducts: false,
   selectedProducts: [],
   models: [],
   selectedModelUrl: null,
@@ -85,6 +95,25 @@ export const useGeneratorStore = create<GeneratorState>((set, get) => ({
   },
   setRatio: (v) => set({ ratio: v }),
   setReferenceImageUrl: (v) => set({ referenceImageUrl: v }),
+
+  loadProducts: async () => {
+    set({ isLoadingProducts: true });
+    try {
+      const res = await apiClient.get<AdminProduct[]>('/adm/v1/products');
+      const mapped: GeneratorProduct[] = res.data
+        .filter((p) => !p.hidden && p.stockStatus !== 'OUT_OF_STOCK')
+        .map((p) => ({
+          productId: p.id,
+          name: `${p.brandName} ${p.productName}`,
+          price: p.salePrice,
+          thumbnailUrl: p.productImageUrl,
+          position: (p.mappedCategory as Position) ?? 'TOP',
+        }));
+      set({ products: mapped, isLoadingProducts: false });
+    } catch {
+      set({ products: [], isLoadingProducts: false });
+    }
+  },
 
   toggleProduct: (p) => set((state) => {
     const exists = state.selectedProducts.find(x => x.productId === p.productId);
