@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useGeneratorStore, MOCK_CAFE24_PRODUCTS, type TargetGender, type StyleType, type Season } from '@/store/useGeneratorStore';
+import { useGeneratorStore, type TargetGender, type StyleType, type Season } from '@/store/useGeneratorStore';
 import { clsx } from 'clsx';
 
 const STYLE_OPTIONS: { value: StyleType; label: string }[] = [
@@ -31,6 +31,7 @@ export function GeneratorSidebar() {
     targetGender, setTargetGender,
     ratio, setRatio,
     referenceImageUrl, setReferenceImageUrl,
+    products, loadProducts, isLoadingProducts,
     selectedProducts, toggleProduct,
     models, selectedModelUrl, setSelectedModelUrl, loadModels, isLoadingModels,
     isGenerating, generate,
@@ -40,6 +41,7 @@ export function GeneratorSidebar() {
 
   useEffect(() => {
     loadModels(targetGender);
+    loadProducts();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -177,33 +179,43 @@ export function GeneratorSidebar() {
         <p className="text-[10px] text-zinc-500 mb-1">이 룩북에 등장할 실제 판매 상품을 엮어주세요.</p>
 
         <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
-          {MOCK_CAFE24_PRODUCTS.map((prod) => {
-            const isSelected = selectedProducts.some(p => p.productId === prod.productId);
-            return (
-              <div
-                key={prod.productId}
-                onClick={() => toggleProduct(prod)}
-                className={clsx(
-                  'flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all border',
-                  isSelected
-                    ? 'border-zinc-900 bg-zinc-50'
-                    : 'border-transparent hover:bg-zinc-50'
-                )}
-              >
-                <div className="w-10 h-10 rounded-md bg-zinc-200 overflow-hidden shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={prod.thumbnailUrl} alt={prod.name} className="w-full h-full object-cover" />
+          {isLoadingProducts ? (
+            <div className="h-20 flex items-center justify-center text-xs text-zinc-400">
+              Loading products...
+            </div>
+          ) : products.length === 0 ? (
+            <div className="h-20 flex items-center justify-center text-xs text-zinc-400">
+              상품을 불러올 수 없습니다.
+            </div>
+          ) : (
+            products.map((prod) => {
+              const isSelected = selectedProducts.some(p => p.productId === prod.productId);
+              return (
+                <div
+                  key={prod.productId}
+                  onClick={() => toggleProduct(prod)}
+                  className={clsx(
+                    'flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all border',
+                    isSelected
+                      ? 'border-zinc-900 bg-zinc-50'
+                      : 'border-transparent hover:bg-zinc-50'
+                  )}
+                >
+                  <div className="w-10 h-10 rounded-md bg-zinc-200 overflow-hidden shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={prod.thumbnailUrl} alt={prod.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-zinc-800 truncate">{prod.name}</p>
+                    <p className="text-[10px] text-zinc-400">{prod.position} · ₩{prod.price.toLocaleString()}</p>
+                  </div>
+                  {isSelected && (
+                    <div className="w-4 h-4 rounded-full bg-zinc-900 flex items-center justify-center text-[10px] text-white">✓</div>
+                  )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-zinc-800 truncate">{prod.name}</p>
-                  <p className="text-[10px] text-zinc-400">{prod.position} · ₩{prod.price.toLocaleString()}</p>
-                </div>
-                {isSelected && (
-                  <div className="w-4 h-4 rounded-full bg-zinc-900 flex items-center justify-center text-[10px] text-white">✓</div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
 
