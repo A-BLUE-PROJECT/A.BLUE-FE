@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useUIStore } from "@/store/useUIStore";
 import { X, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
+
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/apiClient";
 import type { LookbookDetailResponse } from "@/types/lookbook";
@@ -147,12 +147,11 @@ export default function QuickViewModal() {
                 >
                   {/* Right/Top: Main Lookbook Image */}
                   <div className="relative w-full h-[40%] md:h-full md:w-[65%] lg:w-[70%] bg-black shrink-0">
-                    <Image
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                       src={selectedLookbook?.src || "/images/look_top_1.png"}
                       alt="Lookbook Item"
-                      fill
-                      className="object-cover opacity-90 grayscale"
-                      priority
+                      className="w-full h-full object-cover object-top"
                     />
                     <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 bg-black/60 backdrop-blur-md px-4 py-2 border border-white/10 rounded-full flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-blue-500 animate-[pulse_2s_ease-in-out_infinite]" />
@@ -184,7 +183,8 @@ export default function QuickViewModal() {
                       {!detailLoading && detail?.items.map((product) => (
                         <div key={product.productId} className="group relative flex items-center gap-4 bg-zinc-900/50 hover:bg-zinc-800 transition-colors p-3 rounded-2xl border border-white/5">
                           <div className="relative w-20 h-24 md:w-24 md:h-28 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
-                            <Image src={product.productImageUrl} alt={product.productName} fill className="object-cover mix-blend-luminosity opacity-80 group-hover:opacity-100 group-hover:mix-blend-normal transition-all duration-300" />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={product.productImageUrl} alt={product.productName} className="w-full h-full object-cover mix-blend-luminosity opacity-80 group-hover:opacity-100 group-hover:mix-blend-normal transition-all duration-300" />
                           </div>
 
                           <div className="flex-1 flex flex-col justify-center">

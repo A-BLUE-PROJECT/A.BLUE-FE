@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useUIStore, type LookbookLight } from "@/store/useUIStore";
 import { apiClient } from "@/lib/apiClient";
@@ -101,12 +101,11 @@ export default function LookbookGrid() {
                   onClick={() => openQuickView(lookbooks, idx)}
                   className="relative w-full h-full bg-zinc-900 rounded-2xl overflow-hidden border border-white/5 shadow-md cursor-pointer"
                 >
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={lb.src}
                     alt={`Lookbook ${lb.id}`}
-                    fill
-                    className="object-cover transition-all duration-700 ease-out"
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover object-top w-full h-full transition-all duration-700 ease-out"
                   />
 
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
