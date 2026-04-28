@@ -9,7 +9,7 @@ export interface AdminLookbook {
   title: string;
   imageUrl: string;
   aiScore: number;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'PENDING' | 'COMPLETED' | 'APPROVED' | 'REJECTED' | 'FAILED';
   createdAt: string;
 }
 
@@ -83,11 +83,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     try {
       await apiClient.patch(`/adm/v1/lookbooks/${id}/${action}`);
     } catch {
-      // 실패 시 롤백
-      const prev = action === 'approve' ? 'REJECTED' : 'APPROVED';
+      // 실패 시 원래 상태(COMPLETED)로 롤백
       set((state) => ({
         lookbooks: state.lookbooks.map((lb) =>
-          lb.id === id ? { ...lb, status: prev as AdminLookbook['status'] } : lb
+          lb.id === id ? { ...lb, status: 'COMPLETED' } : lb
         ),
       }));
     }

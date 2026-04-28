@@ -28,7 +28,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     apiClient
-      .get<LookbookResponse[] | { items: LookbookResponse[] }>("/adm/v1/lookbooks?status=PENDING")
+      .get<LookbookResponse[] | { items: LookbookResponse[] }>("/adm/v1/lookbooks?status=COMPLETED")
       .then((res) => {
         const raw = Array.isArray(res.data) ? res.data : res.data.items;
         setLookbooks(raw.map(mapToItem));
@@ -45,7 +45,7 @@ export default function AdminDashboard() {
       <header className="mb-12 border-b border-zinc-200 dark:border-zinc-800 pb-6 flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Curation Inspector</h1>
-          <p className="text-zinc-500 mt-2">Approve AI-generated lookbooks to publish on the Main Gallery.</p>
+          <p className="text-zinc-500 mt-2">AI 생성이 완료된 룩북을 검수하고 메인 갤러리에 게시합니다.</p>
         </div>
         <div className="text-right">
           <span className="text-xl font-medium">{lookbooks.length}</span>

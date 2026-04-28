@@ -12,15 +12,17 @@ interface Props {
 export function StatusToggle({ lookbookId, onDone }: Props) {
   const [status, setStatus] = useState<"PENDING" | "APPROVED" | "REJECTED">("PENDING");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handle = async (action: "approve" | "reject") => {
     setLoading(true);
+    setError(null);
     try {
       await apiClient.patch(`/adm/v1/lookbooks/${lookbookId}/${action}`);
       setStatus(action === "approve" ? "APPROVED" : "REJECTED");
       setTimeout(onDone, 600);
-    } catch {
-      // 에러 무시, UI 유지
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "처리 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -45,6 +47,10 @@ export function StatusToggle({ lookbookId, onDone }: Props) {
   }
 
   return (
+    <div className="flex flex-col gap-2">
+      {error && (
+        <p className="text-xs text-rose-500 text-center bg-rose-50 rounded-lg py-2 px-3">{error}</p>
+      )}
     <div className="grid grid-cols-2 gap-3">
       <button
         disabled={loading}
@@ -62,6 +68,7 @@ export function StatusToggle({ lookbookId, onDone }: Props) {
         <CheckCircle2 className="w-4 h-4" />
         <span className="font-semibold">Approve</span>
       </button>
+    </div>
     </div>
   );
 }

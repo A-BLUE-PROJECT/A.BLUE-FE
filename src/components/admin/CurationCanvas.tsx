@@ -8,7 +8,6 @@ import type { LookbookDetailResponse } from '@/types/lookbook';
 
 export function CurationCanvas() {
   const lookbooks = useAdminStore((state) => state.lookbooks);
-  const filterStatus = useAdminStore((state) => state.filterStatus);
   const minAiScore = useAdminStore((state) => state.minAiScore);
   const loading = useAdminStore((state) => state.loading);
   const { selectedLookbookId, setSelectedLookbookId, updateLookbookStatus, fetchLookbooks } = useAdminStore();
@@ -86,15 +85,24 @@ export function CurationCanvas() {
                 )}
               >
                 <div className="aspect-3/4 relative bg-zinc-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={lb.imageUrl} alt={lb.title} className="object-cover w-full h-full" />
+                  {lb.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={lb.imageUrl} alt={lb.title} className="object-cover w-full h-full" />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-zinc-400">
+                      <span className="text-3xl text-rose-300">✕</span>
+                      <span className="text-[10px] font-bold tracking-widest uppercase text-rose-400">생성 실패</span>
+                    </div>
+                  )}
 
                   <div className="absolute top-3 left-3 flex gap-2">
                     <span className={clsx(
                       "px-2 py-1 rounded-md text-[10px] font-bold tracking-wider",
                       lb.status === 'PENDING' ? "bg-amber-100 text-amber-700" :
+                      lb.status === 'COMPLETED' ? "bg-blue-100 text-blue-700" :
                       lb.status === 'APPROVED' ? "bg-lime-100 text-lime-700" :
-                      "bg-rose-100 text-rose-700"
+                      lb.status === 'FAILED' ? "bg-rose-100 text-rose-700" :
+                      "bg-zinc-100 text-zinc-500"
                     )}>
                       {lb.status}
                     </span>
@@ -133,8 +141,16 @@ export function CurationCanvas() {
 
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
               <div className="w-full aspect-3/4 bg-zinc-100 rounded-xl overflow-hidden relative ring-1 ring-black/5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={selectedLookbook.imageUrl} alt="preview" className="object-cover w-full h-full" />
+                {selectedLookbook.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={selectedLookbook.imageUrl} alt="preview" className="object-cover w-full h-full" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-zinc-400">
+                    <span className="text-5xl text-rose-300">✕</span>
+                    <span className="text-xs font-bold tracking-widest uppercase text-rose-400">생성 실패</span>
+                    <span className="text-[10px] text-zinc-400">n8n 워크플로우를 확인하세요</span>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -181,7 +197,7 @@ export function CurationCanvas() {
               </div>
             </div>
 
-            {selectedLookbook.status === 'PENDING' && (
+            {(selectedLookbook.status === 'PENDING' || selectedLookbook.status === 'COMPLETED') && (
               <div className="p-6 border-t border-zinc-100 bg-white grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleAction(selectedLookbook.id, 'reject')}
@@ -202,7 +218,7 @@ export function CurationCanvas() {
               </div>
             )}
 
-            {selectedLookbook.status !== 'PENDING' && (
+            {selectedLookbook.status !== 'PENDING' && selectedLookbook.status !== 'COMPLETED' && (
               <div className="p-6 border-t border-zinc-100 bg-zinc-50 text-center">
                 <p className="text-sm font-medium text-zinc-600">
                   This lookbook is already <span className="font-bold">{selectedLookbook.status}</span>.
