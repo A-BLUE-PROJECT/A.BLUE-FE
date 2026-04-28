@@ -26,5 +26,5 @@ export function useImagePreloader(totalImages: number) {
     return () => clearTimeout(timer);
   }, []);
 
-  return { isLoaded, handleImageLoad, loadedCount };
+  return { isLoaded, handleImageLoad };
 }
