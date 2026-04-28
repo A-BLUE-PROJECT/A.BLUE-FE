@@ -1,87 +1,95 @@
 import { create } from 'zustand';
+import { apiClient } from '@/lib/apiClient';
 
 export type ProductCategory = 'ALL' | 'OUTER' | 'TOP' | 'BOTTOM' | 'ACC';
 
 export interface AdminProduct {
-  id: string;
-  name: string;
-  category: Exclude<ProductCategory, 'ALL'>;
+  id: number;
+  brandName: string;
+  productName: string;
   price: number;
-  stock: number;
-  thumbnailUrl: string;
-  status: 'SYNCED' | 'HIDDEN' | 'ERROR';
-  lastSyncedAt: string;
+  salePrice: number | null;
+  productImageUrl: string;
+  originUrl: string;
+  mappedCategory: Exclude<ProductCategory, 'ALL'>;
+  stockStatus: 'IN_STOCK' | 'OUT_OF_STOCK';
+  hidden: boolean;
 }
-
-const generateMockProducts = (): AdminProduct[] => {
-  const data: AdminProduct[] = [];
-  const baseTime = new Date('2026-03-01T10:00:00Z').getTime();
-
-  for (let i = 1; i <= 30; i++) {
-    const stock = i % 5 === 0 ? 0 : 50 + (i * 3) % 100; // 일부 품절(0) 처리
-    const status = i % 7 === 0 ? 'HIDDEN' : (i % 13 === 0 ? 'ERROR' : 'SYNCED');
-    const categories: Exclude<ProductCategory, 'ALL'>[] = ['OUTER', 'TOP', 'BOTTOM', 'ACC'];
-    const category = categories[i % 4];
-    
-    data.push({
-      id: `C24-P${i.toString().padStart(4, '0')}`,
-      name: `A.BLUE Season Collection Piece #${i}`,
-      category: category,
-      price: 39000 + ((i * 10000) % 200000),
-      stock: stock,
-      thumbnailUrl: `https://picsum.photos/seed/prd${i}/200/200`,
-      status: status,
-      lastSyncedAt: new Date(baseTime - (i * 3600000)).toISOString(), // 1시간 간격 과거
-    });
-  }
-  return data;
-};
 
 interface ProductState {
   products: AdminProduct[];
-  hideOutOfStock: boolean;
   filterCategory: ProductCategory;
   searchQuery: string;
+  hideOutOfStock: boolean;
+  loading: boolean;
   isSyncing: boolean;
 
-  setHideOutOfStock: (val: boolean) => void;
+  fetchProducts: () => Promise<void>;
   setFilterCategory: (val: ProductCategory) => void;
   setSearchQuery: (val: string) => void;
-  toggleProductStatus: (id: string) => void;
-  syncNow: () => void;
+  setHideOutOfStock: (val: boolean) => void;
+  syncNow: () => Promise<void>;
+  toggleHidden: (id: number) => Promise<void>;
 }
 
-export const useProductStore = create<ProductState>((set) => ({
-  products: generateMockProducts(),
-  hideOutOfStock: false,
+export const useProductStore = create<ProductState>((set, get) => ({
+  products: [],
   filterCategory: 'ALL',
   searchQuery: '',
+  hideOutOfStock: false,
+  loading: false,
   isSyncing: false,
 
-  setHideOutOfStock: (val) => set({ hideOutOfStock: val }),
-  setFilterCategory: (val) => set({ filterCategory: val }),
-  setSearchQuery: (val) => set({ searchQuery: val }),
-  
-  toggleProductStatus: (id) => set((state) => ({
-    products: state.products.map(p => {
-      if (p.id === id) {
-        // Toggle SYNCED <-> HIDDEN
-        const newStatus = p.status === 'HIDDEN' ? 'SYNCED' : 'HIDDEN';
-        return { ...p, status: newStatus };
-      }
-      return p;
-    })
-  })),
+  fetchProducts: async () => {
+    set({ loading: true });
+    try {
+      const { filterCategory } = get();
+      const path = filterCategory === 'ALL'
+        ? '/adm/v1/products'
+        : `/adm/v1/products?category=${filterCategory}`;
+      const res = await apiClient.get<AdminProduct[]>(path);
+      set({ products: res.data });
+    } finally {
+      set({ loading: false });
+    }
+  },
 
-  syncNow: () => {
+  setFilterCategory: (val) => {
+    set({ filterCategory: val });
+    // 카테고리 바뀌면 바로 재조회
+    setTimeout(() => get().fetchProducts(), 0);
+  },
+
+  setSearchQuery: (val) => set({ searchQuery: val }),
+
+  setHideOutOfStock: (val) => set({ hideOutOfStock: val }),
+
+  syncNow: async () => {
+    if (get().isSyncing) return;
     set({ isSyncing: true });
-    setTimeout(() => {
-      // Refresh lastSyncedAt to current Mock Date
-      const fakeNow = new Date('2026-03-26T12:00:00Z').toISOString();
+    try {
+      await apiClient.post('/adm/v1/products/sync', {});
+      await get().fetchProducts();
+    } finally {
+      set({ isSyncing: false });
+    }
+  },
+
+  toggleHidden: async (id) => {
+    const product = get().products.find((p) => p.id === id);
+    if (!product) return;
+    const newHidden = !product.hidden;
+    // 낙관적 업데이트
+    set((state) => ({
+      products: state.products.map((p) => p.id === id ? { ...p, hidden: newHidden } : p),
+    }));
+    try {
+      await apiClient.patch(`/adm/v1/products/${id}/hidden`, { hidden: newHidden });
+    } catch {
+      // 실패 시 롤백
       set((state) => ({
-        isSyncing: false,
-        products: state.products.map(p => ({ ...p, lastSyncedAt: fakeNow, status: p.status === 'ERROR' ? 'SYNCED' : p.status }))
+        products: state.products.map((p) => p.id === id ? { ...p, hidden: !newHidden } : p),
       }));
-    }, 2000);
-  }
+    }
+  },
 }));

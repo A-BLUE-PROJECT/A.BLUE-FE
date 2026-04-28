@@ -3,15 +3,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useUIStore } from "@/store/useUIStore";
 import { X, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
-import { useEffect } from "react";
 
-// Mock products for the quick view if not provided by lookbook
-const MOCK_PRODUCTS = [
-  { id: 1, name: "Over-dyed Minimal Jacket", brand: "A.BLUE EDITION", price: "₩ 145,000", image: "/images/look_bottom_1.png" },
-  { id: 2, name: "Wide Parachute Pants", brand: "A.BLUE EDITION", price: "₩ 89,000", image: "/images/look_bottom_2.png" },
-  { id: 3, name: "Chunky Canvas Sneakers", brand: "COMMON PROJECTS", price: "₩ 450,000", image: "/images/look_bottom_4.png" }
-];
+import { useEffect, useState } from "react";
+import { apiClient } from "@/lib/apiClient";
+import type { LookbookDetailResponse } from "@/types/lookbook";
+
 
 const variants = {
   enter: (direction: number) => {
@@ -35,15 +31,29 @@ const variants = {
 };
 
 export default function QuickViewModal() {
-  const { 
-    isQuickViewOpen, 
-    closeQuickView, 
-    quickViewLookbooks, 
-    quickViewIndex, 
+  const {
+    isQuickViewOpen,
+    closeQuickView,
+    quickViewLookbooks,
+    quickViewIndex,
     quickViewDirection,
     nextQuickView,
     prevQuickView
   } = useUIStore();
+  const [detail, setDetail] = useState<LookbookDetailResponse | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  // 선택된 룩북이 바뀔 때마다 상세 fetch
+  useEffect(() => {
+    const lb = quickViewLookbooks[quickViewIndex];
+    if (!lb || !isQuickViewOpen) return;
+    setDetail(null);
+    setDetailLoading(true);
+    apiClient.get<LookbookDetailResponse>(`/w/v1/lookbooks/${lb.id}`)
+      .then((res) => setDetail(res.data))
+      .catch(() => setDetail(null))
+      .finally(() => setDetailLoading(false));
+  }, [quickViewIndex, isQuickViewOpen, quickViewLookbooks]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -80,7 +90,7 @@ export default function QuickViewModal() {
           />
 
           {/* Wrapper to control fixed layout and let inner motion.divs slide around */}
-          <div className="fixed bottom-0 md:top-1/2 left-0 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-210 w-full md:w-[90%] md:max-w-5xl md:h-[80vh] h-[90vh] pointer-events-none">
+          <div className="fixed bottom-0 md:top-1/2 left-0 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-210 w-full md:w-[95%] md:max-w-7xl md:h-[85vh] h-[90vh] pointer-events-none">
             
             {/* Nav Arrows */}
             <div className="absolute inset-y-0 -left-4 md:-left-20 flex items-center pointer-events-auto z-50">
@@ -133,16 +143,15 @@ export default function QuickViewModal() {
                     x: { type: "spring", stiffness: 300, damping: 30 },
                     opacity: { duration: 0.2 }
                   }}
-                  className="absolute inset-0 w-full h-full flex flex-col md:flex-row bg-zinc-900"
+                  className="absolute inset-0 w-full h-full flex flex-col md:flex-row-reverse bg-zinc-900"
                 >
-                  {/* Left/Top: Main Lookbook Image */}
-                  <div className="relative w-full h-[40%] md:h-full md:w-1/2 bg-black shrink-0">
-                    <Image
+                  {/* Right/Top: Main Lookbook Image */}
+                  <div className="relative w-full h-[40%] md:h-full md:w-[65%] lg:w-[70%] bg-black shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                       src={selectedLookbook?.src || "/images/look_top_1.png"}
                       alt="Lookbook Item"
-                      fill
-                      className="object-cover opacity-90 grayscale"
-                      priority
+                      className="w-full h-full object-cover object-top"
                     />
                     <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 bg-black/60 backdrop-blur-md px-4 py-2 border border-white/10 rounded-full flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-blue-500 animate-[pulse_2s_ease-in-out_infinite]" />
@@ -152,8 +161,8 @@ export default function QuickViewModal() {
                     </div>
                   </div>
 
-                  {/* Right/Bottom: Product List */}
-                  <div className="w-full h-[60%] md:h-full md:w-1/2 bg-zinc-950 flex flex-col pt-8 md:pt-12 px-6 pb-6 overflow-y-auto custom-scrollbar relative shrink-0">
+                  {/* Left/Bottom: Product List */}
+                  <div className="w-full h-[60%] md:h-full md:w-[35%] lg:w-[30%] bg-zinc-950 flex flex-col pt-8 md:pt-12 px-6 pb-6 overflow-y-auto custom-scrollbar relative shrink-0 border-r border-white/10 shadow-[10px_0_30px_rgba(0,0,0,0.5)] z-10">
                     <div className="mb-8">
                       <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tighter mb-2">
                         Style Composition
@@ -164,22 +173,30 @@ export default function QuickViewModal() {
                     </div>
 
                     <div className="flex flex-col gap-4 flex-1">
-                      {MOCK_PRODUCTS.map((product) => (
-                        <div key={product.id} className="group relative flex items-center gap-4 bg-zinc-900/50 hover:bg-zinc-800 transition-colors p-3 rounded-2xl border border-white/5">
+                      {detailLoading && (
+                        <div className="flex gap-1.5 justify-center py-8">
+                          {[0, 1, 2].map((i) => (
+                            <div key={i} className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                          ))}
+                        </div>
+                      )}
+                      {!detailLoading && detail?.items.map((product) => (
+                        <div key={product.productId} className="group relative flex items-center gap-4 bg-zinc-900/50 hover:bg-zinc-800 transition-colors p-3 rounded-2xl border border-white/5">
                           <div className="relative w-20 h-24 md:w-24 md:h-28 rounded-xl overflow-hidden bg-zinc-800 shrink-0">
-                            <Image src={product.image} alt={product.name} fill className="object-cover mix-blend-luminosity opacity-80 group-hover:opacity-100 group-hover:mix-blend-normal transition-all duration-300" />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={product.productImageUrl} alt={product.productName} className="w-full h-full object-cover mix-blend-luminosity opacity-80 group-hover:opacity-100 group-hover:mix-blend-normal transition-all duration-300" />
                           </div>
-                          
+
                           <div className="flex-1 flex flex-col justify-center">
-                            <span className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-1">{product.brand}</span>
-                            <h3 className="text-white font-medium text-sm md:text-base leading-tight mb-2 pr-4">{product.name}</h3>
-                            <span className="text-blue-400 font-bold text-sm tracking-wide">{product.price}</span>
+                            <span className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-1">{product.brandName}</span>
+                            <h3 className="text-white font-medium text-sm md:text-base leading-tight mb-2 pr-4">{product.productName}</h3>
+                            <span className="text-blue-400 font-bold text-sm tracking-wide">₩ {product.price.toLocaleString()}</span>
                           </div>
 
                           <div className="absolute right-4 md:right-6">
-                            <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white text-white hover:text-black flex items-center justify-center transition-all">
+                            <a href={product.originUrl} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 hover:bg-white text-white hover:text-black flex items-center justify-center transition-all">
                               <ExternalLink className="w-4 h-4" />
-                            </button>
+                            </a>
                           </div>
                         </div>
                       ))}

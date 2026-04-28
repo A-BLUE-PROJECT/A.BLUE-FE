@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUIStore } from "@/store/useUIStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { openLoginModal } = useUIStore();
+  const { user, fetchMe, logout } = useAuthStore();
+
+  useEffect(() => {
+    fetchMe();
+  }, [fetchMe]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,9 +41,15 @@ export default function Header() {
         
         {/* Right: Minimal Nav */}
         <nav className="flex items-center gap-6 md:gap-8 text-[11px] md:text-sm font-bold tracking-widest uppercase">
-          <button onClick={openLoginModal} className="hover:underline underline-offset-8 decoration-2 transition-all">
-            LOG IN
-          </button>
+          {user ? (
+            <button onClick={logout} className="hover:underline underline-offset-8 decoration-2 transition-all">
+              LOG OUT
+            </button>
+          ) : (
+            <button onClick={openLoginModal} className="hover:underline underline-offset-8 decoration-2 transition-all">
+              LOG IN
+            </button>
+          )}
           
           {/* Dropdown Menu Container */}
           <div className="relative group py-4 -my-4">
@@ -49,7 +61,6 @@ export default function Header() {
             <div className="absolute right-0 top-full pt-2 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 ease-out">
               <div className="flex flex-col gap-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md py-4 px-5 rounded-xl shadow-2xl border border-black/5 dark:border-white/10 whitespace-nowrap text-right">
                 <Link href="/" className="text-sm font-black tracking-widest hover:text-blue-600 dark:hover:text-blue-400 transition-colors">HOME</Link>
-                <Link href="/gallery" className="text-sm font-black tracking-widest hover:text-blue-600 dark:hover:text-blue-400 transition-colors">GALLERY</Link>
               </div>
             </div>
           </div>

@@ -4,15 +4,12 @@ import type { NextRequest } from "next/server";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Guard /hq routes
+  // Guard /hq routes (admin only)
   if (pathname.startsWith("/hq")) {
-    const isAuthenticated = 
-      request.cookies.has("next-auth.session-token") || 
-      request.cookies.has("__Secure-next-auth.session-token");
-    
-    // Redirect to home if strictly blocked
+    const isAuthenticated = request.cookies.has("admin_access_token");
+
     if (!isAuthenticated) {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/hq/login", request.url));
     }
   }
 
@@ -20,5 +17,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/hq/:path*"],
+  matcher: ["/hq/((?!login).*)"],
 };
