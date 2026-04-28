@@ -15,7 +15,6 @@ ALLBLUE는 여러 브랜드(Cafe24 입점 셀러)의 상품을 AI로 조합해 �
 
 ## ALLBLUE-FE 포지션
 
-기존 DEKK FE는 랜딩 없이 갤러리 중심 구성이었습니다.  
 ALLBLUE-FE는 새 기획을 바탕으로 전 영역을 신규 구현하였으며, 아래 화면 전체가 1인 작업 결과물입니다.
 
 ---
@@ -77,5 +76,4 @@ npm run dev
 
 | 레포 | 설명 |
 |------|------|
-| A.BLUE-BE | Django REST Framework 기반 백엔드 |
-| Mirror Agent | 룩북 생성 AI 에이전트 |
+| A.BLUE-BE | JAVA Spring Framework 기반 백엔드 |
