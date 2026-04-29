@@ -73,7 +73,5 @@ npm run dev
 ---
 
 ## 관련 레포
-
-| 레포 | 설명 |
-|------|------|
-| A.BLUE-BE | JAVA Spring Framework 기반 백엔드 |
+| [A.BLUE-BE](https://github.com/A-BLUE-PROJECT/A.BLUE-BE) | Spring Boot 백엔드 |
+| [Mirror Agent](https://github.com/woongblack/mirror-agent) | 자체 검토 도구 |
